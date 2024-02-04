@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "819174712629",
+    "project_id": "nutrition-app-7a3da",
+    "storage_bucket": "nutrition-app-7a3da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819174712629:android:c680184358e6bbdf22d87c",
+        "android_client_info": {
+          "package_name": "com.example.flutterapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjZCxf7ZNJHfo7moYk4NwT5j7IkKZVXo0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
