@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Color(hexToInteger('FFF5F3ED')),
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('welcome to [name]'),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 40.0),
@@ -69,12 +69,22 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+                '[NAME]',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 80.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            SizedBox(height: 20.0),
             TextField(
               controller: emailController,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
-                labelText: 'Username',
-                hintText: 'Enter your username',
+                labelText: 'email',
+                hintText: 'enter your email',
               ),
             ),
             SizedBox(height: 20.0),
@@ -82,15 +92,15 @@ class _LoginPageState extends State<LoginPage> {
               controller: passwordController,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
-                labelText: 'Password',
-                hintText: 'Passwords must be at least 8 characters',
+                labelText: 'password',
+                hintText: 'enter your password',
               ),
               obscureText: true,
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: () {
-                createUserWithEmailAndPassword();
+                isLogin ?  signInWithEmailAndPassword() : createUserWithEmailAndPassword();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFA8C8D7), // A8C8D7 color
@@ -101,10 +111,34 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             child: Text(
-              'Login',
+              isLogin ? 'login' : 'sign up',
                 style: TextStyle(fontSize: 18.0, color: Colors.black),
                 ),
               ),
+              SizedBox(height: 5.0),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isLogin = !isLogin;
+                  });
+                },
+                child: Text(
+                  isLogin ? "don't have an account? sign up" : "already have an account? login",
+                  style: TextStyle(color: Colors.black, decoration: TextDecoration.underline, fontSize: 14.0),
+                  textAlign: TextAlign.center,
+                ),
+            ),
+            SizedBox(height: 3.0),
+              Text(
+                errorMessage ?? '',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14.0,
+                ),
+              ),
+
+              SizedBox(height: 100.0),
           ],
         ),
       ),
