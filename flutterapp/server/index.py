@@ -6,6 +6,12 @@ app = Flask(__name__)
 def getTest():
     return "working"
 
+@app.route('/test-post', methods=['POST'])
+def postTest():
+    data = request.json
+    return data
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
