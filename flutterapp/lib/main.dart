@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutterapp/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutterapp/pages/start_goals.dart';
 import 'pages/login.dart';
 
 Future<void> main() async {
@@ -31,7 +32,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
       // home: LoginPage(),
-      home: HomePage(),
+      home: StartGoals(),
+      // home: HomePage(),
       routes: {
         'homepage': (context) => HomePage(),
       }
