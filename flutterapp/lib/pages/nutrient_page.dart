@@ -48,14 +48,15 @@ class _NutrientPageState extends State<NutrientPage> {
 
           children: [
             Center(
-              child: Image.asset('lib/images/graphic1.jpg', width: 200,
-                                        height: 100,),
+              child: Image.asset('lib/images/graphic1.jpg', width: 200, height: 100,),
             ),
 
             SizedBox(height: 20),
 
             Container(
                 decoration: BoxDecoration(
+                  
+                  color: Color(hexToInteger('FFFFFFFF')),
                   borderRadius : BorderRadius.only(
                     topLeft: Radius.circular(10),
                     topRight: Radius.circular(10),
