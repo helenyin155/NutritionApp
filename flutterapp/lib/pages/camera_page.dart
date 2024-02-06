@@ -16,7 +16,7 @@ class CameraPage extends StatefulWidget {
 
 class _CameraPageState extends State<CameraPage> {
 
-  Future<dynamic> fetchProductFromBarcode(String barcode) async {
+  Future<NutritionData> fetchProductFromBarcode(String barcode) async {
 
     // OPEN FOOD FACTS API
 
@@ -26,27 +26,28 @@ class _CameraPageState extends State<CameraPage> {
       if (response.statusCode == 200) {
         var res = jsonDecode(response.body);
         var data = res['product'];
+        var nutritionalData = data['nutriments'];
         
         final NutritionData product = NutritionData(
           itemCode: res['code'],
           brandName: data['brands'] ?? 'Unknown Brand Name',
           itemName: data['product_name_en'] ?? data['product_name'] ?? "Unknown Product Name", 
-          caloriesPerServing: data['energy-kcal_serving'] ?? -1,
-          caloriesPer100g: data['energy-kcal_100g'] ?? -1,
-          proteinPerServing: data['proteins_serving'] ?? -1, 
-          proteinPer100g: data['proteins_100g'] ?? -1, 
-          carbsPerServing: data['carbohydrates_serving'] ?? -1,
-          carbsPer100g: data['carbohydrates_100g'] ?? -1,
-          fatPerServing: data['fat_serving'] ?? -1,
-          fatPer100g: data['fat_100g'] ?? -1, 
+          caloriesPerServing: (nutritionalData['energy-kcal_serving'] as num?)?.toDouble() ?? -1.0,
+          caloriesPer100g: (nutritionalData['energy-kcal_100g'] as num?)?.toDouble() ?? -1.0,
+          proteinPerServing: (nutritionalData['proteins_serving'] as num?)?.toDouble() ?? -1.0, 
+          proteinPer100g: (nutritionalData['proteins_100g'] as num?)?.toDouble() ?? -1.0, 
+          carbsPerServing: (nutritionalData['carbohydrates_serving'] as num?)?.toDouble() ?? -1.0,
+          carbsPer100g: (nutritionalData['carbohydrates_100g'] as num?)?.toDouble() ?? -1.0,
+          fatPerServing: (nutritionalData['fat_serving'] as num?)?.toDouble() ?? -1.0,
+          fatPer100g: (nutritionalData['fat_100g'] as num?)?.toDouble() ?? -1.0, 
           );
         return product;
       } else {
-        print("There was an error fetching product data.");
-        return -1;
+        throw("");
+        
       }
     } catch (e) {
-      print("There was an error: $e");
+      throw("There was an error: $e");
     }
 
     
@@ -89,16 +90,16 @@ class _CameraPageState extends State<CameraPage> {
       print(barcodeScanRes);
 
       fetchProductFromBarcode(barcodeScanRes).then((value) => {
-            if (value == 0) 
+            if (value == null) 
             {
               print("Error")
             }
              else {
-              print(value.itemName)
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => NutritionInformation(data: value))
-              // )
+              
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NutritionInformation(data: value))
+              )
             }
           });
     } on PlatformException {
@@ -120,7 +121,7 @@ class _CameraPageState extends State<CameraPage> {
 }
 
 class NutritionInformation extends StatefulWidget {
-  final Map<String, dynamic> data;
+  final NutritionData data;
   
   NutritionInformation({Key? key, required this.data}) : super(key: key);
 
@@ -130,10 +131,33 @@ class NutritionInformation extends StatefulWidget {
 
 class _NutritionInformationState extends State<NutritionInformation> {
 
+  final List<String> nutritionList = ['caloriesPerServing', 'caloriesPer100g', 'proteinPerServing', 'proteinPer100g', 'carbsPerServing' ,'carbsPer100g', 'fatPerServing', 'fatPer100g'];
+  final List<String> labelList = [
+    'Calories Per Serving: ',
+    'Calories Per 100g: ', 
+    'Protein Per Serving (g):', 
+    'Protein Per 100g (g): ', 
+    'Carbohydrates Per Serving (g): ', 
+    'Carbohydrates Per 100g (g): ', 
+    'Total Fat Per Serving (g): ', 
+    'Total Fat Per 100g (g):'];
+
+
 
 
   @override
   Widget build(BuildContext context) {
+
+    List<Widget> collectedData = [Text(widget.data.getProperty('itemCode')), Text(widget.data.getProperty('itemName')),];
+    for (int i = 0; i < nutritionList.length; i++) {
+      if (widget.data.getProperty(nutritionList[i]) == -1.0) {
+        // collectedData.add(Text("Error"));
+        continue;
+      } else {
+        collectedData.add(Text("${labelList[i]}${widget.data.getProperty(nutritionList[i]).toString()}"));
+      }
+    }
+
     return Scaffold(
       body: Align(
         alignment: Alignment.center,
@@ -142,11 +166,11 @@ class _NutritionInformationState extends State<NutritionInformation> {
           
           children: 
           [
-            Text('${widget.data['brand_name']} ${widget.data['food_name']}'),
-            Text('${widget.data['nf_calories'].toString()} calories'),
-            Text('${widget.data['nf_total_carbohydrate'].toString()}g Carbohydrates'),
-            Text('${widget.data['nf_protein'].toString()}g Protein'),
-            Text('${widget.data['nf_total_fat'].toString()}g Total Fat'),
+            Column(
+              children:
+              
+              collectedData,
+            ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: Text("Back"))
@@ -163,17 +187,17 @@ class NutritionData {
   String brandName;
   String itemName;
 
-  int caloriesPerServing;
-  int caloriesPer100g;
+  double caloriesPerServing;
+  double caloriesPer100g;
 
-  int proteinPerServing;
-  int proteinPer100g;
+  double proteinPerServing;
+  double proteinPer100g;
 
-  int carbsPerServing;
-  int carbsPer100g;
+  double carbsPerServing;
+  double carbsPer100g;
 
-  int fatPerServing;
-  int fatPer100g;
+  double fatPerServing;
+  double fatPer100g;
   
   NutritionData(
     {
@@ -189,6 +213,35 @@ class NutritionData {
       required this.fatPerServing,
       required this.fatPer100g
       });
+  
+  dynamic getProperty(String propertyName) {
+    switch (propertyName) {
+      case 'itemCode':
+        return itemCode;
+      case 'brandName':
+        return brandName;
+      case 'itemName':
+        return itemName;
+      case 'caloriesPerServing':
+        return caloriesPerServing;
+      case 'caloriesPer100g':
+        return caloriesPer100g;
+      case 'proteinPerServing':
+        return proteinPerServing;
+      case 'proteinPer100g':
+        return proteinPer100g;
+      case 'carbsPerServing':
+        return carbsPerServing;
+      case 'carbsPer100g':
+        return carbsPer100g;
+      case 'fatPerServing':
+        return fatPerServing;
+      case 'fatPer100g':
+        return fatPer100g;
+      default:
+        throw Exception('Property not found');
+    }
+  }
 
   
 }
