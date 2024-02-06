@@ -16,8 +16,13 @@ class TestAPI extends StatefulWidget {
 }
 
 class _TestAPIState extends State<TestAPI> {
+
+
+  // URL WILL HAVE TO BE UPDATED IF NGROK TUNNEL RESTARTS 
+  final String url = 'https://cb4e-2620-101-f000-700-3fb9-eca2-34f0-878b.ngrok-free.app';
+
   Future<String> fetchTest() async {
-    final response = await http.get(Uri.parse('https://c005-2620-101-f000-740-00-a3e.ngrok-free.app/test'));
+    final response = await http.get(Uri.parse('$url/test'));
     if (response.statusCode == 200) {
       return response.body;
     } else {
@@ -27,7 +32,7 @@ class _TestAPIState extends State<TestAPI> {
 
   Future<http.Response> postTest(String text) {
     return http.post(
-      Uri.parse('http://127.0.0.1:5000/test-post'),
+      Uri.parse('$url/test-post'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
