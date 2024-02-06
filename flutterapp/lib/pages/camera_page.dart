@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 
 class CameraPage extends StatefulWidget {
@@ -12,6 +14,37 @@ class CameraPage extends StatefulWidget {
 }
 
 class _CameraPageState extends State<CameraPage>  {
+
+  Future<void> getBarcodeInfo(String barcode) async {
+    final String url = 'https://world.openfoodfacts.org/api/v0/product/$barcode.json';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        if (data['status'] == 1) {
+          final productData = data['product'];
+          final macroData = productData['nutriments'];
+          print(productData['product_name']);
+          print(macroData['carbohydrates']);
+
+          
+        } else {
+          print('product not found');
+        }
+
+
+      } else {
+        print('There was an error fetching product data.');
+      }
+
+      
+
+    } catch (e) {
+      print(e);
+    }
+  }
   
 
   Future<void> scanBarcode() async {
@@ -24,7 +57,7 @@ class _CameraPageState extends State<CameraPage>  {
         false, 
         ScanMode.BARCODE
         );
-      print(barcodeScanRes);
+      getBarcodeInfo(barcodeScanRes);
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
     }
