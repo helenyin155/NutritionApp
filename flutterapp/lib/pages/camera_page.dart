@@ -16,13 +16,16 @@ class CameraPage extends StatefulWidget {
 
 class _CameraPageState extends State<CameraPage> {
 
-  Future<NutritionData> fetchProductFromBarcode(String barcode) async {
+  Future<NutritionData?> fetchProductFromBarcode(String barcode) async {
 
     // OPEN FOOD FACTS API
 
     try {
       final response = await http.get(Uri.parse('https://world.openfoodfacts.org/api/v0/product/$barcode.json'));
       print('https://world.openfoodfacts.org/api/v0/product/$barcode.json');
+      
+
+      
       if (response.statusCode == 200) {
         var res = jsonDecode(response.body);
         var data = res['product'];
@@ -43,11 +46,14 @@ class _CameraPageState extends State<CameraPage> {
           );
         return product;
       } else {
-        throw("");
+        
+        return null;
         
       }
     } catch (e) {
-      throw("There was an error: $e");
+      return null;
+      
+      
     }
 
     
@@ -92,7 +98,10 @@ class _CameraPageState extends State<CameraPage> {
       fetchProductFromBarcode(barcodeScanRes).then((value) => {
             if (value == null) 
             {
-              print("Error")
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ErrorPage())
+              )
             }
              else {
               
@@ -117,6 +126,30 @@ class _CameraPageState extends State<CameraPage> {
                 TextButton(onPressed: scanBarcode, child: Text("Scan Barcode")))
       ],
     ));
+  }
+}
+
+class ErrorPage extends StatelessWidget {
+  const ErrorPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Align(
+        alignment: Alignment.center,
+        
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Could not find product."),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context), 
+              child: Text("Scan Another Item"))
+
+          ],
+        )
+      )
+    );
   }
 }
 
