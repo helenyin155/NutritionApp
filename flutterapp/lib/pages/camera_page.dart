@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 
+
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
 
@@ -13,11 +14,11 @@ class CameraPage extends StatefulWidget {
   State<CameraPage> createState() => _CameraPageState();
 }
 
-class _CameraPageState extends State<CameraPage>  {
+class _CameraPageState extends State<CameraPage> {
 
-  Future<void> fetchProductFromBarcode(String barcode) async {
-    const String appId = '81477e08'; 
-    const String apiKey = '7e42a19f2cb6049ff6f8128d0f146110'; 
+  Future<dynamic> fetchProductFromBarcode(String barcode) async {
+    const String appId = '81477e08';
+    const String apiKey = '7e42a19f2cb6049ff6f8128d0f146110';
     const String url = 'https://trackapi.nutritionix.com/v2/search/item';
 
     // curl -X GET "https://trackapi.nutritionix.com/v2/search/item?upc=0064042555140" -H "x-app-id: 81477e08" -H "x-app-key: 7e42a19f2cb6049ff6f8128d0f146110"
@@ -30,47 +31,48 @@ class _CameraPageState extends State<CameraPage>  {
     //,{"attr_id":605,"value":0},{"attr_id":606,"value":4.5}],"nix_brand_name":"Leclerc","nix_brand_id":"51db37b9176fe9790a898c6d","nix_item_name":"Celebration Mini Chocolate Chip Cookies",
     //"nix_item_id":"54e87b195af0cf56477f84d4","metadata":{},"source":8,"ndb_no":null,"tags":null,"alt_measures":null,"lat":null,"lng":null,"photo":
     //{"thumb":"https://nutritionix-api.s3.amazonaws.com/54eb698ac3965b7654a0bd0b.jpeg","highres":null,"is_user_uploaded":false},"note":null,"class_code":null,"brick_code":null,"tag_id":null,
-    //"updated_at":"2021-10-03T13:54:50+00:00","nf_ingredient_statement":"ENRICHED WHEAT FLOUR (WHEAT FLOUR, NIACIN, REDUCED IRON, THIAMINE MONONITRATE, RIBOFLAVIN, FOLIC ACID), 
-    //NESTLÉ® TOLL HOUSE® SEMI-SWEET CHOCOLATE MORSELS (SUGAR, CHOCOLATE, MILKFAT, COCOA BUTTER, SOY LECITHIN, NATURAL FLAVORS), BROWN SUGAR, SUGAR, VEGETABLE SHORTENING 
+    //"updated_at":"2021-10-03T13:54:50+00:00","nf_ingredient_statement":"ENRICHED WHEAT FLOUR (WHEAT FLOUR, NIACIN, REDUCED IRON, THIAMINE MONONITRATE, RIBOFLAVIN, FOLIC ACID),
+    //NESTLÉ® TOLL HOUSE® SEMI-SWEET CHOCOLATE MORSELS (SUGAR, CHOCOLATE, MILKFAT, COCOA BUTTER, SOY LECITHIN, NATURAL FLAVORS), BROWN SUGAR, SUGAR, VEGETABLE SHORTENING
     //(PALM OIL, SOYBEAN OIL, BETA CAROTENE [COLOR], WHEY), WATER, BUTTER (CREAM, SALT), EGGS, 2% OR LESS OF SALT, BAKING SODA (CONTAINS SOY LECITHIN), NATURAL FLAVOR, VANILLA EXTRACT"}]}%
 
     try {
-      final response = await http.get(
-        Uri.parse('$url?upc=$barcode'),
-        headers: {
-          'x-app-id': appId,
-          'x-app-key' : apiKey,
-          }
-        );
+      final response = await http.get(Uri.parse('$url?upc=$barcode'), headers: {
+        'x-app-id': appId,
+        'x-app-key': apiKey,
+      });
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        print(data);
-
-
+        return data['foods'][0];
+        
       } else {
         print('There was an error fetching product data.');
+        return 0;
       }
-
-      
-
     } catch (e) {
       print(e);
     }
   }
-  
 
   Future<void> scanBarcode() async {
     String barcodeScanRes;
 
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        "#ffffff", 
-        "Cancel", 
-        false, 
-        ScanMode.BARCODE
-        );
+          "#ffffff", "Cancel", false, ScanMode.BARCODE);
       print(barcodeScanRes);
-      fetchProductFromBarcode(barcodeScanRes);
+
+      fetchProductFromBarcode(barcodeScanRes).then((value) => {
+            if (value == 0) 
+            {
+              print("Error")
+            }
+             else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NutritionInformation(data: value))
+              )
+            }
+          });
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
     }
@@ -79,11 +81,48 @@ class _CameraPageState extends State<CameraPage>  {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Center(child: TextButton(onPressed: scanBarcode, child: Text("Scan Barcode")))
-        ],
+        body: Column(
+      children: [
+        Center(
+            child:
+                TextButton(onPressed: scanBarcode, child: Text("Scan Barcode")))
+      ],
+    ));
+  }
+}
+
+class NutritionInformation extends StatefulWidget {
+  final Map<String, dynamic> data;
+  
+  NutritionInformation({Key? key, required this.data}) : super(key: key);
+
+  @override
+  State<NutritionInformation> createState() => _NutritionInformationState();
+}
+
+class _NutritionInformationState extends State<NutritionInformation> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Align(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          
+          children: 
+          [
+            Text('${widget.data['brand_name']} ${widget.data['food_name']}'),
+            Text('${widget.data['nf_calories'].toString()} calories'),
+            Text('${widget.data['nf_total_carbohydrate'].toString()}g Carbohydrates'),
+            Text('${widget.data['nf_protein'].toString()}g Protein'),
+            Text('${widget.data['nf_total_fat'].toString()}g Total Fat'),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Back"))
+          ],
+        ),
       )
     );
   }
 }
+
