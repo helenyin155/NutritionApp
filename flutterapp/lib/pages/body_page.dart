@@ -17,7 +17,7 @@ class TestAPI extends StatefulWidget {
 
 class _TestAPIState extends State<TestAPI> {
   Future<String> fetchTest() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:5000/test'));
+    final response = await http.get(Uri.parse('https://c005-2620-101-f000-740-00-a3e.ngrok-free.app/test'));
     if (response.statusCode == 200) {
       return response.body;
     } else {

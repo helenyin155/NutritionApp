@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: 65.0,
+                  fontSize: 80.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),

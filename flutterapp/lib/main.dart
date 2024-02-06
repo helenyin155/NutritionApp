@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
       // home: LoginPage(),
-      home: StartGoals(),
-      // home: HomePage(),
+      // home: StartGoals(),
+      home: HomePage(),
       routes: {
         'homepage': (context) => HomePage(),
       }
