@@ -33,6 +33,7 @@ class _CameraPageState extends State<CameraPage> {
         
         final NutritionData product = NutritionData(
           itemCode: res['code'],
+          imgURL: data['image_url'] ?? 'No Image',
           brandName: data['brands'] ?? 'Unknown Brand Name',
           itemName: data['product_name_en'] ?? data['product_name'] ?? "Unknown Product Name", 
           caloriesPerServing: (nutritionalData['energy-kcal_serving'] as num?)?.toDouble() ?? -1.0,
@@ -153,6 +154,8 @@ class ErrorPage extends StatelessWidget {
   }
 }
 
+
+
 class NutritionInformation extends StatefulWidget {
   final NutritionData data;
   
@@ -181,7 +184,27 @@ class _NutritionInformationState extends State<NutritionInformation> {
   @override
   Widget build(BuildContext context) {
 
-    List<Widget> collectedData = [Text(widget.data.getProperty('itemCode')), Text(widget.data.getProperty('itemName')),];
+    List<Widget> collectedData;
+
+    if (widget.data.getProperty('imgURL') == 'No Image') {
+      collectedData = [
+        Container(
+          child: Text("No Image"),
+          ),
+        Text(widget.data.getProperty('itemCode')), 
+        Text(widget.data.getProperty('itemName')),];
+    } else {
+      collectedData = [
+        Container(
+          height: 200,
+          child: Image.network(widget.data.getProperty('imgURL'),
+          fit: BoxFit.contain,),
+        ),
+        Text(widget.data.getProperty('itemCode')), 
+        Text(widget.data.getProperty('itemName')),];
+
+    }
+
     for (int i = 0; i < nutritionList.length; i++) {
       if (widget.data.getProperty(nutritionList[i]) == -1.0) {
         // collectedData.add(Text("Error"));
@@ -216,6 +239,7 @@ class _NutritionInformationState extends State<NutritionInformation> {
 
 class NutritionData {
   String itemCode;
+  String imgURL;
 
   String brandName;
   String itemName;
@@ -235,6 +259,7 @@ class NutritionData {
   NutritionData(
     {
       required this.itemCode,
+      required this.imgURL,
       required this.brandName,
       required this.itemName,
       required this.caloriesPerServing,
@@ -251,6 +276,8 @@ class NutritionData {
     switch (propertyName) {
       case 'itemCode':
         return itemCode;
+      case 'imgURL':
+        return imgURL;
       case 'brandName':
         return brandName;
       case 'itemName':
