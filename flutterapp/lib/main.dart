@@ -35,9 +35,9 @@ class MyApp extends StatelessWidget {
       ),
       // home: LoginPage(),
       // home: StartGoals(),
-      home: NutrientPage(),
+      // home: NutrientPage(),
       // home: Iphone13144Widget(),
-      // home: HomePage(),
+      home: HomePage(),
       routes: {
         'homepage': (context) => HomePage(),
       }
