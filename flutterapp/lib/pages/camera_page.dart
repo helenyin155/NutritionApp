@@ -17,11 +17,47 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
 
   Future<dynamic> fetchProductFromBarcode(String barcode) async {
+
+    // OPEN FOOD FACTS API
+
+    try {
+      final response = await http.get(Uri.parse('https://world.openfoodfacts.org/api/v0/product/$barcode.json'));
+      print('https://world.openfoodfacts.org/api/v0/product/$barcode.json');
+      if (response.statusCode == 200) {
+        var res = jsonDecode(response.body);
+        var data = res['product'];
+        
+        final NutritionData product = NutritionData(
+          itemCode: res['code'],
+          brandName: data['brands'] ?? 'Unknown Brand Name',
+          itemName: data['product_name_en'] ?? data['product_name'] ?? "Unknown Product Name", 
+          caloriesPerServing: data['energy-kcal_serving'] ?? -1,
+          caloriesPer100g: data['energy-kcal_100g'] ?? -1,
+          proteinPerServing: data['proteins_serving'] ?? -1, 
+          proteinPer100g: data['proteins_100g'] ?? -1, 
+          carbsPerServing: data['carbohydrates_serving'] ?? -1,
+          carbsPer100g: data['carbohydrates_100g'] ?? -1,
+          fatPerServing: data['fat_serving'] ?? -1,
+          fatPer100g: data['fat_100g'] ?? -1, 
+          );
+        return product;
+      } else {
+        print("There was an error fetching product data.");
+        return -1;
+      }
+    } catch (e) {
+      print("There was an error: $e");
+    }
+
+    
+
+    // NUTRITIONIX API
+
+    /*
     const String appId = '3450e0e3';
     const String apiKey = '419aaaf150a658af0e727a6c5ba7afc0';
     const String url = 'https://trackapi.nutritionix.com/v2/search/item';
 
-    
     try {
       final response = await http.get(Uri.parse('$url?upc=$barcode'), headers: {
         'x-app-id': appId,
@@ -38,6 +74,10 @@ class _CameraPageState extends State<CameraPage> {
     } catch (e) {
       print(e);
     }
+    */
+
+    
+
   }
 
   Future<void> scanBarcode() async {
@@ -54,10 +94,11 @@ class _CameraPageState extends State<CameraPage> {
               print("Error")
             }
              else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NutritionInformation(data: value))
-              )
+              print(value.itemName)
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => NutritionInformation(data: value))
+              // )
             }
           });
     } on PlatformException {
@@ -114,5 +155,41 @@ class _NutritionInformationState extends State<NutritionInformation> {
       )
     );
   }
+}
+
+class NutritionData {
+  String itemCode;
+
+  String brandName;
+  String itemName;
+
+  int caloriesPerServing;
+  int caloriesPer100g;
+
+  int proteinPerServing;
+  int proteinPer100g;
+
+  int carbsPerServing;
+  int carbsPer100g;
+
+  int fatPerServing;
+  int fatPer100g;
+  
+  NutritionData(
+    {
+      required this.itemCode,
+      required this.brandName,
+      required this.itemName,
+      required this.caloriesPerServing,
+      required this.caloriesPer100g,
+      required this.proteinPerServing,
+      required this.proteinPer100g,
+      required this.carbsPerServing,
+      required this.carbsPer100g,
+      required this.fatPerServing,
+      required this.fatPer100g
+      });
+
+  
 }
 
