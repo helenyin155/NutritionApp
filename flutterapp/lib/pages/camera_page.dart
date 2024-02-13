@@ -21,8 +21,10 @@ class _CameraPageState extends State<CameraPage> {
     // OPEN FOOD FACTS API
 
     try {
+      
       final response = await http.get(Uri.parse('https://world.openfoodfacts.org/api/v0/product/$barcode.json'));
       print('https://world.openfoodfacts.org/api/v0/product/$barcode.json');
+      
       
 
       
@@ -59,6 +61,8 @@ class _CameraPageState extends State<CameraPage> {
 
     
 
+    
+
     // NUTRITIONIX API
 
     /*
@@ -87,6 +91,8 @@ class _CameraPageState extends State<CameraPage> {
     
 
   }
+
+
 
   Future<void> scanBarcode() async {
     String barcodeScanRes;
