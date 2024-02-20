@@ -21,9 +21,34 @@ def getIngredients(upc):
 
 # current upc data base is just a placeholder, current db limits requests
 
+# Example response for upc #0888849010455
+# [
+#   "Ingredients: Protein Blend (milk Protein Isolate",
+#   "Whey Protein Isolate)",
+#   "High Oleic Sunflower Oil",
+#   "Calcium Caseinate",
+#   "Corn Starch",
+#   "Natural Flavors",
+#   "Psyllium Husk",
+#   "Salt. Contains Less Than 2% Of The Following: Onion Powder",
+#   "Paprika",
+#   "Spice",
+#   "Chia Seed",
+#   "Vinegar Powder",
+#   "Lime Juice Powder",
+#   "Sugar",
+#   "Yeast",
+#   "Citric Acid",
+#   "Turmeric Oleoresin (color)",
+#   "Paprika Extract (color) Sunflower Lecithin",
+#   "Calcium Carbonate",
+#   "Yeast Extract",
+#   "Stevia Sweetener.contains: Milk Processed In A Facility That Also Processes Soy And Wheat."
+# ]
+
 @app.route('/get-ingredients/<upc>')
 def returnIngredients(upc):
-    
+    print(getIngredients(upc).split(', '))
     return getIngredients(upc).split(', ')
 
 @app.route('/test')

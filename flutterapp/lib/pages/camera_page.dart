@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:math';
 
 
 
@@ -32,6 +33,13 @@ class _CameraPageState extends State<CameraPage> {
         var res = jsonDecode(response.body);
         var data = res['product'];
         var nutritionalData = data['nutriments'];
+
+        try {
+          final ingredientsResponse = await http.get(Uri.parse('https://cb4e-2620-101-f000-700-3fb9-eca2-34f0-878b.ngrok-free.app/get-ingredients/$barcode'));
+          
+        } catch (e) {
+          print(e);
+        }
         
         final NutritionData product = NutritionData(
           itemCode: res['code'],
@@ -190,33 +198,67 @@ class _NutritionInformationState extends State<NutritionInformation> {
   @override
   Widget build(BuildContext context) {
 
-    List<Widget> collectedData;
+    List<Widget> itemInformation;
+    List<Widget> macroData;
 
     if (widget.data.getProperty('imgURL') == 'No Image') {
-      collectedData = [
+      itemInformation = [
+        Text(
+          "Here's what we found:"
+        ),
         Container(
           child: Text("No Image"),
           ),
-        Text(widget.data.getProperty('itemCode')), 
-        Text(widget.data.getProperty('itemName')),];
+        Text(widget.data.getProperty('itemCode'),
+        style: TextStyle(
+            fontSize: 14.0,
+            fontWeight: FontWeight.w500
+          ),), 
+        Text(widget.data.getProperty('itemName'),
+         style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w700
+          ),),];
     } else {
-      collectedData = [
+      itemInformation = [
+        Text(
+          "Here's what we found",
+          style: TextStyle(
+            fontSize: 24.0,
+            fontWeight: FontWeight.w700
+          ),
+        ),
         Container(
           height: 200,
           child: Image.network(widget.data.getProperty('imgURL'),
           fit: BoxFit.contain,),
         ),
-        Text(widget.data.getProperty('itemCode')), 
-        Text(widget.data.getProperty('itemName')),];
+        Text(widget.data.getProperty('itemCode'),
+        style: TextStyle(
+            fontSize: 14.0,
+            fontWeight: FontWeight.w500
+          ),), 
+        Text(widget.data.getProperty('itemName'),
+         style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w700
+          ),),];
 
     }
 
+  double roundDouble(double value, int places){ 
+   num mod = pow(10, places); 
+   return ((value * mod).round().toDouble() / mod); 
+  }
+
+    macroData = [];
     for (int i = 0; i < nutritionList.length; i++) {
       if (widget.data.getProperty(nutritionList[i]) == -1.0) {
         // collectedData.add(Text("Error"));
         continue;
       } else {
-        collectedData.add(Text("${labelList[i]}${widget.data.getProperty(nutritionList[i]).toString()}"));
+        print(nutritionList[i]);
+        macroData.add(Text("${labelList[i]}${roundDouble(widget.data.getProperty(nutritionList[i]), 2).toString()}"));
       }
     }
 
@@ -228,11 +270,39 @@ class _NutritionInformationState extends State<NutritionInformation> {
           
           children: 
           [
-            Column(
-              children:
-              
-              collectedData,
+            Container(
+              child: Column(
+                children: itemInformation
+                )
             ),
+            Container(
+              
+              height: 400,
+              width: 300,
+              
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Color.fromARGB(255, 255, 255, 255),
+                boxShadow: [
+                  const BoxShadow( 
+                    color: Colors.grey,
+                    offset: Offset(1.0, 1.0),
+                    blurRadius: 1.0
+
+                  )
+                ]
+                
+
+              ),
+              child: Column(
+                children: macroData,
+            ),
+
+
+
+            )
+            ,
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: Text("Back"))
