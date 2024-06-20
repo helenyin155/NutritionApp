@@ -1,16 +1,40 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from bs4 import BeautifulSoup
 import requests
+import asyncio
+from pyppeteer import launch
+from pyppeteer_stealth import stealth
+from multiprocessing import Pool
 
 app = Flask(__name__)
 
-def getIngredients(upc):
-    url = 'https://go-upc.com/search?q=%s' % upc
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+async def getPage(url):
+    browser = await launch({
+        'Headless' : False,
+        'args': [
+        '--disable-infobars',
+        '--window-size=1920,1080',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled',
+    ]
+    })
+    page = await browser.newPage()
 
-    htmlDoc = requests.get(url, headers=headers).text
-    
-    soup = BeautifulSoup(htmlDoc, 'html.parser')
+    await stealth(page)
+
+    await page.goto(url)
+
+    html = await page.content()
+    await browser.close()
+    return html
+
+
+async def getIngredients(upc):
+    url = 'https://go-upc.com/search?q=%s' % upc
+    html_response = await getPage(url)
+
+    soup = BeautifulSoup(html_response, 'html.parser')
 
     for listItem in soup.find_all('li'):
         label = str(listItem.find('span').text)
@@ -19,37 +43,26 @@ def getIngredients(upc):
     
     return 'Could not find ingredients'
 
-# current upc data base is just a placeholder, current db limits requests
-
-# Example response for upc #0888849010455
-# [
-#   "Ingredients: Protein Blend (milk Protein Isolate",
-#   "Whey Protein Isolate)",
-#   "High Oleic Sunflower Oil",
-#   "Calcium Caseinate",
-#   "Corn Starch",
-#   "Natural Flavors",
-#   "Psyllium Husk",
-#   "Salt. Contains Less Than 2% Of The Following: Onion Powder",
-#   "Paprika",
-#   "Spice",
-#   "Chia Seed",
-#   "Vinegar Powder",
-#   "Lime Juice Powder",
-#   "Sugar",
-#   "Yeast",
-#   "Citric Acid",
-#   "Turmeric Oleoresin (color)",
-#   "Paprika Extract (color) Sunflower Lecithin",
-#   "Calcium Carbonate",
-#   "Yeast Extract",
-#   "Stevia Sweetener.contains: Milk Processed In A Facility That Also Processes Soy And Wheat."
-# ]
+def getIngredientsWrapper(upc):
+    return asyncio.run(getIngredients(upc))
 
 @app.route('/get-ingredients/<upc>')
 def returnIngredients(upc):
-    print(getIngredients(upc).split(', '))
-    return getIngredients(upc).split(', ')
+    with Pool(1) as p:
+        result = p.apply(getIngredientsWrapper, (upc,))
+    
+    print({'ingredients': result})
+    return jsonify({'ingredients': result})
+
+# @app.route('/get-ingredients/<upc>')
+# def returnIngredients(upc):
+#      with Pool(1) as p:
+#         result = p.apply(getIngredientsWrapper, (upc,))
+#     return jsonify({'ingredients': result})
+#     # ingredients = asyncio.run(getIngredients('0722252217950'))
+#     # print(ingredients)
+#     # return 'Worked'
+#     # return asyncio.run(getIngredients(upc)).split(', ')
 
 @app.route('/test')
 def getTest():
