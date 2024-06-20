@@ -1,8 +1,10 @@
 from flask import Flask, request
 from bs4 import BeautifulSoup
 import requests
+import datetime
 
 app = Flask(__name__)
+
 
 def getIngredients(upc):
     url = 'https://go-upc.com/search?q=%s' % upc
