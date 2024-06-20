@@ -1,12 +1,9 @@
 from flask import Flask, request, jsonify
 from bs4 import BeautifulSoup
 import requests
-import asyncio
-from pyppeteer import launch
-from pyppeteer_stealth import stealth
-from multiprocessing import Pool
 
 app = Flask(__name__)
+
 
 async def getPage(url):
     browser = await launch({
